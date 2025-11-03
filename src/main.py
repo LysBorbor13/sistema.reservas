@@ -4,20 +4,19 @@ from datetime import datetime
 from clientes import Cliente
 from reservas import Reserva
 
-# Rutas para datos (se crea carpeta data en la raíz del proyecto)
+# Rutas para datos
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 CLIENTES_FILE = os.path.join(DATA_DIR, "clientes.json")
 RESERVAS_FILE = os.path.join(DATA_DIR, "reservas.json")
 
-# Estructuras en memoria
-clientes = {}   # id_cliente -> Cliente
-reservas = []   # lista de Reserva
+clientes = {}     # HashMap: id_cliente -> Cliente
+reservas = []     # Lista de Reserva
 
 
-# -----------------------
-# Utilidades de persistencia
-# -----------------------
+# =============================
+#   UTILIDADES DE ARCHIVOS
+# =============================
 def ensure_data_dir():
     if not os.path.isdir(DATA_DIR):
         os.makedirs(DATA_DIR)
@@ -25,31 +24,34 @@ def ensure_data_dir():
 
 def load_data():
     ensure_data_dir()
-    # Cargar clientes
+
+    # ----- CLIENTES -----
     if os.path.isfile(CLIENTES_FILE):
-        with open(CLIENTES_FILE, "r", encoding="utf-8") as f:
-            try:
-                raw = json.load(f)
-                for item in raw:
-                    c = Cliente(item["id"], item["nombre"], item["email"], item["telefono"])
-                    clientes[c.id] = c
-            except json.JSONDecodeError:
-                print("Advertencia: clientes.json está corrupto o vacío.")
-    # Cargar reservas
+        try:
+            with open(CLIENTES_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for c in data:
+                    cliente = Cliente(c["id"], c["nombre"], c["email"], c["telefono"])
+                    clientes[cliente.id] = cliente
+        except:
+            print("⚠️ Advertencia: clientes.json está vacío o dañado.")
+
+    # ----- RESERVAS -----
     if os.path.isfile(RESERVAS_FILE):
-        with open(RESERVAS_FILE, "r", encoding="utf-8") as f:
-            try:
-                raw = json.load(f)
-                for item in raw:
-                    r = Reserva(item["id"], item["id_cliente"], item["fecha"], item["hora"], item["servicio"])
-                    reservas.append(r)
-            except json.JSONDecodeError:
-                print("Advertencia: reservas.json está corrupto o vacío.")
+        try:
+            with open(RESERVAS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for r in data:
+                    reserva = Reserva(r["id"], r["id_cliente"], r["fecha"], r["hora"], r["servicio"])
+                    reservas.append(reserva)
+        except:
+            print("⚠️ Advertencia: reservas.json está vacío o dañado.")
 
 
 def save_data():
     ensure_data_dir()
-    # Guardar clientes
+
+    # Guardar CLIENTES
     with open(CLIENTES_FILE, "w", encoding="utf-8") as f:
         json.dump(
             [
@@ -58,9 +60,10 @@ def save_data():
             ],
             f,
             ensure_ascii=False,
-            indent=2,
+            indent=2
         )
-    # Guardar reservas
+
+    # Guardar RESERVAS
     with open(RESERVAS_FILE, "w", encoding="utf-8") as f:
         json.dump(
             [
@@ -69,48 +72,42 @@ def save_data():
             ],
             f,
             ensure_ascii=False,
-            indent=2,
+            indent=2
         )
 
 
-# -----------------------
-# Validaciones
-# -----------------------
-def validar_id_no_repetido_id_cliente(id_cliente):
-    return id_cliente not in clientes
-
-
-def validar_id_no_repetido_reserva(id_reserva):
-    return all(r.id != id_reserva for r in reservas)
-
-
-def validar_fecha(fecha_texto):
+# =============================
+#        VALIDACIONES
+# =============================
+def validar_fecha(fecha):
     try:
-        datetime.strptime(fecha_texto, "%Y-%m-%d")
+        datetime.strptime(fecha, "%Y-%m-%d")
         return True
-    except ValueError:
+    except:
         return False
 
 
-def validar_hora(hora_texto):
+def validar_hora(hora):
     try:
-        datetime.strptime(hora_texto, "%H:%M")
+        datetime.strptime(hora, "%H:%M")
         return True
-    except ValueError:
+    except:
         return False
 
 
-# -----------------------
-# Operaciones del sistema
-# -----------------------
+# =============================
+#     FUNCIONES DEL SISTEMA
+# =============================
 def registrar_cliente():
     print("\n--- Registrar Cliente ---")
     id_cliente = input("ID del cliente: ").strip()
+
     if not id_cliente:
-        print(" El ID no puede estar vacío.")
+        print("❌ El ID no puede estar vacío.")
         return
-    if not validar_id_no_repetido_id_cliente(id_cliente):
-        print(" Error: ID de cliente ya existe.")
+
+    if id_cliente in clientes:
+        print("❌ Ese ID de cliente ya existe.")
         return
 
     nombre = input("Nombre: ").strip()
@@ -120,32 +117,62 @@ def registrar_cliente():
     cliente = Cliente(id_cliente, nombre, email, telefono)
     clientes[id_cliente] = cliente
     save_data()
-    print("\n Cliente registrado correctamente.\n")
+
+    print("\n✅ Cliente registrado correctamente.\n")
+
+
+def editar_cliente():
+    print("\n--- Editar Cliente ---")
+    id_cliente = input("ID del cliente a editar: ").strip()
+
+    if id_cliente not in clientes:
+        print("\n❌ No existe un cliente con ese ID.\n")
+        return
+
+    cliente = clientes[id_cliente]
+
+    print("\nCliente actual:")
+    print(cliente)
+
+    print("\nDeja en blanco los campos que NO quieras cambiar.\n")
+
+    nuevo_nombre = input(f"Nombre ({cliente.nombre}): ").strip()
+    nuevo_email = input(f"Email ({cliente.email}): ").strip()
+    nuevo_telefono = input(f"Teléfono ({cliente.telefono}): ").strip()
+
+    if nuevo_nombre:
+        cliente.nombre = nuevo_nombre
+    if nuevo_email:
+        cliente.email = nuevo_email
+    if nuevo_telefono:
+        cliente.telefono = nuevo_telefono
+
+    save_data()
+    print("\n✅ Cliente editado correctamente.\n")
 
 
 def registrar_reserva():
     print("\n--- Registrar Reserva ---")
     id_reserva = input("ID de la reserva: ").strip()
-    if not id_reserva:
-        print(" El ID no puede estar vacío.")
-        return
-    if not validar_id_no_repetido_reserva(id_reserva):
-        print(" Error: ID de reserva ya existe.")
+
+    if any(r.id == id_reserva for r in reservas):
+        print("❌ Ese ID de reserva ya existe.")
         return
 
     id_cliente = input("ID del cliente: ").strip()
+
     if id_cliente not in clientes:
-        print(" Error: el cliente no existe.")
+        print("\n❌ Ese cliente no existe.\n")
         return
 
     fecha = input("Fecha (AAAA-MM-DD): ").strip()
     if not validar_fecha(fecha):
-        print(" Formato de fecha inválido. Use AAAA-MM-DD.")
+        print("❌ Formato de fecha incorrecto.")
         return
 
     hora = input("Hora (HH:MM): ").strip()
     if not validar_hora(hora):
-        print(" Formato de hora inválido. Use HH:MM (24h).")
+        print("❌ Formato de hora incorrecto.")
         return
 
     servicio = input("Servicio: ").strip()
@@ -153,90 +180,96 @@ def registrar_reserva():
     reserva = Reserva(id_reserva, id_cliente, fecha, hora, servicio)
     reservas.append(reserva)
     save_data()
-    print("\n Reserva registrada correctamente.\n")
+
+    print("\n✅ Reserva registrada correctamente.\n")
 
 
 def listar_clientes():
     print("\n--- Lista de Clientes ---")
     if not clientes:
-        print("No hay clientes registrados.\n")
+        print("No hay clientes.\n")
         return
 
-    for cli in clientes.values():
-        print(cli)
+    for c in clientes.values():
+        print(c)
     print()
 
 
 def listar_reservas():
-    print("\n--- Lista de Reservas (ordenadas por fecha y hora) ---")
+    print("\n--- Lista de Reservas ---")
     if not reservas:
-        print("No hay reservas registradas.\n")
+        print("No hay reservas.\n")
         return
 
-    reservas_ordenadas = sorted(reservas, key=lambda r: (r.fecha, r.hora))
-    for r in reservas_ordenadas:
+    ordenadas = sorted(reservas, key=lambda r: (r.fecha, r.hora))
+
+    for r in ordenadas:
         print(r)
     print()
 
 
 def buscar_cliente_por_id():
     print("\n--- Buscar Cliente por ID ---")
-    id_buscar = input("ID del cliente: ").strip()
-    c = clientes.get(id_buscar)
-    if c:
-        print("\nEncontrado:")
-        print(c)
+    id_buscar = input("ID: ").strip()
+
+    if id_buscar in clientes:
+        print("\n✅ Encontrado:")
+        print(clientes[id_buscar])
     else:
-        print("\nNo se encontró un cliente con ese ID.")
+        print("\n❌ No encontrado.")
     print()
 
 
 def buscar_reserva_por_id():
     print("\n--- Buscar Reserva por ID ---")
-    id_buscar = input("ID de la reserva: ").strip()
-    encontrados = [r for r in reservas if r.id == id_buscar]
-    if encontrados:
-        for r in encontrados:
+    id_buscar = input("ID: ").strip()
+
+    res = [r for r in reservas if r.id == id_buscar]
+
+    if res:
+        for r in res:
             print(r)
     else:
-        print("\nNo se encontró reserva con ese ID.")
+        print("\n❌ No se encontró esa reserva.")
     print()
 
 
 def eliminar_reserva():
     print("\n--- Eliminar Reserva ---")
-    id_buscar = input("ID de la reserva a eliminar: ").strip()
+    id_reserva = input("ID: ").strip()
+
     for i, r in enumerate(reservas):
-        if r.id == id_buscar:
+        if r.id == id_reserva:
             del reservas[i]
             save_data()
-            print("\n Reserva eliminada.\n")
+            print("\n✅ Reserva eliminada.\n")
             return
-    print("\n No se encontró la reserva.\n")
+
+    print("\n❌ No existe esa reserva.\n")
 
 
-# -----------------------
-# Menú y UI (simple)
-# -----------------------
-def mostrar_encabezado():
-    print("\n" + "=" * 40)
-    print("   SISTEMA DE RESERVAS - Odalys")
-    print("=" * 40)
-
-
+# =============================
+#            MENÚ
+# =============================
 def menu():
-    load_data()  # Cargar datos al iniciar
+    load_data()
+
     while True:
-        mostrar_encabezado()
+        print("\n==============================")
+        print("     SISTEMA DE RESERVAS     ")
+        print("==============================")
         print("1. Registrar cliente")
         print("2. Registrar reserva")
         print("3. Listar clientes")
         print("4. Listar reservas")
-        print("5. Buscar cliente por ID")
-        print("6. Buscar reserva por ID")
-        print("7. Eliminar reserva")
-        print("8. Salir")
-        opcion = input("\nElige una opción: ").strip()
+        print("5. Buscar cliente")
+        print("6. Buscar reserva")
+        print("7. Editar cliente")
+        print("8. Eliminar reserva")
+        print("9. Salir")
+        print("==============================")
+
+        opcion = input("Elige una opción: ").strip()
 
         if opcion == "1":
             registrar_cliente()
@@ -251,12 +284,14 @@ def menu():
         elif opcion == "6":
             buscar_reserva_por_id()
         elif opcion == "7":
-            eliminar_reserva()
+            editar_cliente()
         elif opcion == "8":
+            eliminar_reserva()
+        elif opcion == "9":
             print("\n¡Gracias por usar el sistema!\n")
             break
         else:
-            print("\n Opción no válida. Intenta de nuevo.\n")
+            print(" Opción no válida.\n")
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ def load_data():
                     cliente = Cliente(c["id"], c["nombre"], c["email"], c["telefono"])
                     clientes[cliente.id] = cliente
         except:
-            print("⚠️ Advertencia: clientes.json está vacío o dañado.")
+            print(" Advertencia: clientes.json está vacío o dañado.")
 
     # ----- RESERVAS -----
     if os.path.isfile(RESERVAS_FILE):
@@ -45,7 +45,7 @@ def load_data():
                     reserva = Reserva(r["id"], r["id_cliente"], r["fecha"], r["hora"], r["servicio"])
                     reservas.append(reserva)
         except:
-            print("⚠️ Advertencia: reservas.json está vacío o dañado.")
+            print(" Advertencia: reservas.json está vacío o dañado.")
 
 
 def save_data():
@@ -103,11 +103,11 @@ def registrar_cliente():
     id_cliente = input("ID del cliente: ").strip()
 
     if not id_cliente:
-        print("❌ El ID no puede estar vacío.")
+        print(" El ID no puede estar vacío.")
         return
 
     if id_cliente in clientes:
-        print("❌ Ese ID de cliente ya existe.")
+        print(" Ese ID de cliente ya existe.")
         return
 
     nombre = input("Nombre: ").strip()
@@ -118,7 +118,7 @@ def registrar_cliente():
     clientes[id_cliente] = cliente
     save_data()
 
-    print("\n✅ Cliente registrado correctamente.\n")
+    print("\n Cliente registrado correctamente.\n")
 
 
 def editar_cliente():
@@ -126,7 +126,7 @@ def editar_cliente():
     id_cliente = input("ID del cliente a editar: ").strip()
 
     if id_cliente not in clientes:
-        print("\n❌ No existe un cliente con ese ID.\n")
+        print("\n No existe un cliente con ese ID.\n")
         return
 
     cliente = clientes[id_cliente]
@@ -148,7 +148,7 @@ def editar_cliente():
         cliente.telefono = nuevo_telefono
 
     save_data()
-    print("\n✅ Cliente editado correctamente.\n")
+    print("\n Cliente editado correctamente.\n")
 
 def editar_reserva():
     print("\n--- Editar Reserva ---")
@@ -162,7 +162,7 @@ def editar_reserva():
             break
 
     if reserva is None:
-        print("\n❌ No existe una reserva con ese ID.\n")
+        print("\n No existe una reserva con ese ID.\n")
         return
 
     print("\nReserva actual:")
@@ -179,18 +179,18 @@ def editar_reserva():
         if validar_fecha(nueva_fecha):
             reserva.fecha = nueva_fecha
         else:
-            print("❌ Fecha inválida. No se modificó.")
+            print(" Fecha inválida. No se modificó.")
     if nueva_hora:
         if validar_hora(nueva_hora):
             reserva.hora = nueva_hora
         else:
-            print("❌ Hora inválida. No se modificó.")
+            print(" Hora inválida. No se modificó.")
     if nuevo_servicio:
         reserva.servicio = nuevo_servicio
 
     save_data()
 
-    print("\n✅ Reserva editada correctamente.\n")
+    print("\n Reserva editada correctamente.\n")
 
 
 
@@ -199,23 +199,23 @@ def registrar_reserva():
     id_reserva = input("ID de la reserva: ").strip()
 
     if any(r.id == id_reserva for r in reservas):
-        print("❌ Ese ID de reserva ya existe.")
+        print(" Ese ID de reserva ya existe.")
         return
 
     id_cliente = input("ID del cliente: ").strip()
 
     if id_cliente not in clientes:
-        print("\n❌ Ese cliente no existe.\n")
+        print("\n Ese cliente no existe.\n")
         return
 
     fecha = input("Fecha (AAAA-MM-DD): ").strip()
     if not validar_fecha(fecha):
-        print("❌ Formato de fecha incorrecto.")
+        print(" Formato de fecha incorrecto.")
         return
 
     hora = input("Hora (HH:MM): ").strip()
     if not validar_hora(hora):
-        print("❌ Formato de hora incorrecto.")
+        print(" Formato de hora incorrecto.")
         return
 
     servicio = input("Servicio: ").strip()
@@ -224,7 +224,7 @@ def registrar_reserva():
     reservas.append(reserva)
     save_data()
 
-    print("\n✅ Reserva registrada correctamente.\n")
+    print("\n Reserva registrada correctamente.\n")
 
 
 def listar_clientes():
@@ -256,10 +256,10 @@ def buscar_cliente_por_id():
     id_buscar = input("ID: ").strip()
 
     if id_buscar in clientes:
-        print("\n✅ Encontrado:")
+        print("\n Encontrado:")
         print(clientes[id_buscar])
     else:
-        print("\n❌ No encontrado.")
+        print("\n No encontrado.")
     print()
 
 
@@ -273,7 +273,7 @@ def buscar_reserva_por_id():
         for r in res:
             print(r)
     else:
-        print("\n❌ No se encontró esa reserva.")
+        print("\n No se encontró esa reserva.")
     print()
 
 
@@ -285,10 +285,10 @@ def eliminar_reserva():
         if r.id == id_reserva:
             del reservas[i]
             save_data()
-            print("\n✅ Reserva eliminada.\n")
+            print("\n Reserva eliminada.\n")
             return
 
-    print("\n❌ No existe esa reserva.\n")
+    print("\n No existe esa reserva.\n")
 
 
 # =============================

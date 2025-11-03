@@ -150,6 +150,49 @@ def editar_cliente():
     save_data()
     print("\n✅ Cliente editado correctamente.\n")
 
+def editar_reserva():
+    print("\n--- Editar Reserva ---")
+    id_reserva = input("ID de la reserva a editar: ").strip()
+
+    # Buscar la reserva
+    reserva = None
+    for r in reservas:
+        if r.id == id_reserva:
+            reserva = r
+            break
+
+    if reserva is None:
+        print("\n❌ No existe una reserva con ese ID.\n")
+        return
+
+    print("\nReserva actual:")
+    print(reserva)
+
+    print("\nDeja vacío lo que NO quieras modificar.\n")
+
+    nueva_fecha = input(f"Fecha ({reserva.fecha}): ").strip()
+    nueva_hora = input(f"Hora ({reserva.hora}): ").strip()
+    nuevo_servicio = input(f"Servicio ({reserva.servicio}): ").strip()
+
+    # Validaciones
+    if nueva_fecha:
+        if validar_fecha(nueva_fecha):
+            reserva.fecha = nueva_fecha
+        else:
+            print("❌ Fecha inválida. No se modificó.")
+    if nueva_hora:
+        if validar_hora(nueva_hora):
+            reserva.hora = nueva_hora
+        else:
+            print("❌ Hora inválida. No se modificó.")
+    if nuevo_servicio:
+        reserva.servicio = nuevo_servicio
+
+    save_data()
+
+    print("\n✅ Reserva editada correctamente.\n")
+
+
 
 def registrar_reserva():
     print("\n--- Registrar Reserva ---")
@@ -265,9 +308,10 @@ def menu():
         print("5. Buscar cliente")
         print("6. Buscar reserva")
         print("7. Editar cliente")
-        print("8. Eliminar reserva")
-        print("9. Salir")
-        print("==============================")
+        print("8. Editar reserva")
+        print("9. Eliminar reserva")
+        print("10. Salir")
+
 
         opcion = input("Elige una opción: ").strip()
 
@@ -286,10 +330,13 @@ def menu():
         elif opcion == "7":
             editar_cliente()
         elif opcion == "8":
-            eliminar_reserva()
+            editar_reserva()
         elif opcion == "9":
-            print("\n¡Gracias por usar el sistema!\n")
-            break
+            eliminar_reserva()
+        elif opcion == "10":
+             print("\n¡Gracias por usar el sistema!\n")
+             break
+
         else:
             print(" Opción no válida.\n")
 

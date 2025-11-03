@@ -192,6 +192,55 @@ def editar_reserva():
 
     print("\n Reserva editada correctamente.\n")
 
+def reporte_reservas_por_cliente():
+    print("\n--- Reporte: Reservas por Cliente ---")
+    id_cliente = input("ID del cliente: ").strip()
+
+    if id_cliente not in clientes:
+        print("\n El cliente no existe.\n")
+        return
+
+    print(f"\nCliente: {clientes[id_cliente].nombre}")
+
+    reservas_cliente = [r for r in reservas if r.id_cliente == id_cliente]
+
+    if not reservas_cliente:
+        print("No tiene reservas registradas.\n")
+        return
+
+    print("\nReservas del cliente:\n")
+    for r in reservas_cliente:
+        print(r)
+    print()
+
+def reporte_reservas_por_fecha():
+    print("\n--- Reporte: Reservas por Fecha ---")
+    fecha = input("Fecha (AAAA-MM-DD): ").strip()
+
+    if not validar_fecha(fecha):
+        print(" Fecha inválida.\n")
+        return
+
+    reservas_fecha = [r for r in reservas if r.fecha == fecha]
+
+    if not reservas_fecha:
+        print("\nNo hay reservas en esa fecha.\n")
+        return
+
+    print(f"\nReservas para {fecha}:\n")
+    for r in reservas_fecha:
+        print(r)
+    print()
+
+def reporte_totales():
+    print("\n--- Reporte de Totales ---")
+    total_clientes = len(clientes)
+    total_reservas = len(reservas)
+
+    print(f"\nTotal de clientes registrados: {total_clientes}")
+    print(f"Total de reservas registradas: {total_reservas}\n")
+
+
 
 
 def registrar_reserva():
@@ -310,7 +359,11 @@ def menu():
         print("7. Editar cliente")
         print("8. Editar reserva")
         print("9. Eliminar reserva")
-        print("10. Salir")
+        print("10. Reporte: Reservas por cliente")
+        print("11. Reporte: Reservas por fecha")
+        print("12. Reporte: Totales")
+
+        print("13. Salir")
 
 
         opcion = input("Elige una opción: ").strip()
@@ -334,6 +387,12 @@ def menu():
         elif opcion == "9":
             eliminar_reserva()
         elif opcion == "10":
+            reporte_reservas_por_cliente()
+        elif opcion == "11":
+            reporte_reservas_por_fecha()
+        elif opcion == "12":
+            reporte_totales()
+        elif opcion == "13":
              print("\n¡Gracias por usar el sistema!\n")
              break
 
